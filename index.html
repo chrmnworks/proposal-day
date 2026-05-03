@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<title>Our Day</title>
+
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    text-align: center;
+    padding: 30px;
+    background: #fdfaf6;
+    color: #333;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+  }
+
+  .card {
+    display: none;
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 16px;
+    background: white;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    animation: fadeIn 1s ease forwards;
+  }
+
+  button {
+    margin-top: 20px;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: none;
+    background: #9caf88;
+    color: white;
+    cursor: pointer;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+
+<body>
+
+<h1>Today is about us</h1>
+<p>Something will appear when we arrive somewhere special...</p>
+
+<button onclick="manualUnlock()">Something unlocked 🤍</button>
+
+<!-- CARDS -->
+
+<div id="card1" class="card">
+  <h2>How we met</h2>
+  <p>
+    (Write your story here — keep it warm, light, and personal.)
+  </p>
+</div>
+
+<div id="card2" class="card">
+  <h2>When I knew</h2>
+  <p>
+    (Describe the moment it became real for you.)
+  </p>
+</div>
+
+<div id="card3" class="card">
+  <h2>What I love about us</h2>
+  <p>
+    (Specific things, quirks, inside jokes.)
+  </p>
+</div>
+
+<div id="card4" class="card">
+  <h2>Our future</h2>
+  <p>
+    (Talk about growing together, hint at forever.)
+  </p>
+</div>
+
+<div id="card5" class="card">
+  <h2>One more thing...</h2>
+  <p>
+    There’s something I’ve been wanting to ask you.
+  </p>
+</div>
+
+<script>
+// ----------------------
+// LOCATIONS (pre-wired)
+// ----------------------
+const locations = [
+  { id: "card1", name: "Grindelwald", lat: 46.6242, lon: 8.0414 },
+  { id: "card2", name: "Murren Trail", lat: 46.5585, lon: 7.8921 },
+  { id: "card3", name: "Allmendhubel", lat: 46.5590, lon: 7.8915 },
+  { id: "card4", name: "Lauterbrunnen", lat: 46.5937, lon: 7.9070 }
+];
+
+// Track unlocked cards
+let unlocked = 0;
+
+// ----------------------
+// DISTANCE FUNCTION
+// ----------------------
+function isNear(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI/180;
+  const dLon = (lon2 - lon1) * Math.PI/180;
+
+  const a =
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI/180) *
+    Math.cos(lat2 * Math.PI/180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const distance = R * c;
+
+  return distance < 0.3; // 300m buffer (important in mountains)
+}
+
+// ----------------------
+// SHOW CARD
+// ----------------------
+function showCard(id) {
+  const el = document.getElementById(id);
+  if (el && el.style.display !== "block") {
+    el.style.display = "block";
+    unlocked++;
+  }
+}
+
+// ----------------------
+// GPS CHECK
+// ----------------------
+function checkLocation() {
+  if (!navigator.geolocation) return;
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+
+    locations.forEach(loc => {
+      if (isNear(lat, lon, loc.lat, loc.lon)) {
+        showCard(loc.id);
+      }
+    });
+  });
+}
+
+// Run every 10 seconds
+setInterval(checkLocation, 10000);
+
+// ----------------------
+// MANUAL BUTTON (fallback)
+// ----------------------
+function manualUnlock() {
+  const nextCard = "card" + (unlocked + 1);
+  showCard(nextCard);
+}
+
+// ----------------------
+// QR PARAM SUPPORT
+// ----------------------
+const params = new URLSearchParams(window.location.search);
+const cardParam = params.get("card");
+
+if (cardParam) {
+  showCard("card" + cardParam);
+}
+
+</script>
+
+</body>
+</html>
