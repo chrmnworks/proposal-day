@@ -99,11 +99,66 @@
         .status-text { margin-top: 25px; font-size: 0.85rem; color: #888; }
         .hidden { display: none; }
 
+        .progress-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #e0e0e0; /* Locked state */
+            transition: all 0.4s ease;
+        }
+
+        .dot.active {
+            background-color: var(--accent); /* Unlocked state */
+            transform: scale(1.3);
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        /* Fade-in Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        /* Make banner image transition smoothly */
+        .banner-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Style for clickable dots */
+        .dot.unlocked {
+            cursor: pointer;
+            background-color: var(--accent);
+        }
+
+        .dot.unlocked:hover {
+            transform: scale(1.5);
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <div class="progress-container">
+          <div class="dot" id="dot-1"></div>
+          <div class="dot" id="dot-2"></div>
+          <div class="dot" id="dot-3"></div>
+          <div class="dot" id="dot-4"></div>
+          <div class="dot" id="dot-5"></div>
+        </div>
         <!-- Banner Image -->
         <div class="banner-wrapper">
             <!-- Replace the src below with your actual photo link -->
@@ -135,12 +190,14 @@
         let unlockedStep = null;
 
         const itinerary = [
-            { step: 1, lat: 32.7243, lon: -117.1249, radius: 2000, title: "Coffee in Grindelwald", message: "Let's start our day with something warm. I'm so happy to be here with you." },
-            { step: 2, lat: 46.5594, lon: 7.8928, radius: 2000, title: "Mürren Peaks", message: "Look at the mountains around us. They've stood here for ages, just like my love for you." },
-            { step: 3, lat: 46.5595, lon: 7.8850, radius: 1000, title: "A View for Two", message: "Lunch at Allmendhubel. Enjoy the view, but remember you're the best view I've ever seen." },
-            { step: 4, lat: 46.5935, lon: 7.9076, radius: 1500, title: "Waterfall Whispers", message: "The Lauterbrunnen valley is magical, but it pales in comparison to you." },
-            { step: 5, lat: 46.5990, lon: 7.9080, radius: 500,  title: "The Moment", message: "I brought you here to ask you a question. Turn around..." }
+            { step: 1, lat: 32.7243, lon: -117.1249, radius: 2000, title: "Coffee in Grindelwald", message: "Let's start our day with something warm. I'm so happy to be here with you.", photo: "coffee_date.jpg" },
+            { step: 2, lat: 46.5594, lon: 7.8928, radius: 2000, title: "Mürren Peaks", message: "Look at the mountains around us. They've stood here for ages, just like my love for you.", photo: "hiking_memory.jpg" },
+            { step: 3, lat: 46.5595, lon: 7.8850, radius: 1000, title: "A View for Two", message: "Lunch at Allmendhubel. Enjoy the view, but remember you're the best view I've ever seen.", photo: "lunch_date.jpg" },
+            { step: 4, lat: 46.5935, lon: 7.9076, radius: 1500, title: "Waterfall Whispers", message: "The Lauterbrunnen valley is magical, but it pales in comparison to you.", photo: "waterfall_date.jpg" },
+            { step: 5, lat: 46.5990, lon: 7.9080, radius: 500,  title: "The Moment", message: "I brought you here to ask you a question. Turn around...", photo: "image.jpg" }
         ];
+
+        let maxReachedStep = 0;
 
         function getDistance(lat1, lon1, lat2, lon2) {
             const R = 6371e3;
@@ -156,12 +213,101 @@
             }
         }
 
+        // --- ADD THIS HELPER FUNCTION ---
+        function logDebug(message) {
+            const statusEl = document.getElementById('gps-status');
+            // Appends the log to the status text so you can see it on your phone
+            statusEl.innerHTML += `<br><span style="color: #d35400; font-size: 10px;">[LOG] ${message}</span>`;
+            console.log("[LOG]", message);
+        }
+
+        // --- UPDATE THIS FUNCTION ---
+        function updateProgress(currentStep) {
+            logDebug(`updateProgress called with step: ${currentStep}`);
+            
+            if (currentStep > maxReachedStep) {
+                logDebug(`New max step! Upgrading from ${maxReachedStep} to ${currentStep}`);
+                maxReachedStep = currentStep;
+                
+                try {
+                    localStorage.setItem('journeyMaxStep', maxReachedStep);
+                    logDebug(`Successfully saved ${maxReachedStep} to localStorage`);
+                } catch (e) {
+                    logDebug(`ERROR saving to localStorage: ${e.message}`);
+                }
+            }
+
+            for (let i = 1; i <= 5; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                if (i <= maxReachedStep) {
+                    dot.classList.add('active', 'unlocked');
+                    dot.onclick = () => {
+                        logDebug(`Revisiting step ${i}`);
+                        const stepData = itinerary.find(item => item.step === i);
+                        showCard(stepData);
+                    };
+                } else {
+                    dot.classList.remove('active', 'unlocked');
+                    dot.onclick = null;
+                }
+            }
+        }
+
+        // --- UPDATE THIS FUNCTION ---
+        window.onload = () => {
+            logDebug("App initialized.");
+            
+            try {
+                const savedStep = localStorage.getItem('journeyMaxStep');
+                if (savedStep) {
+                    logDebug(`Found saved step in memory: ${savedStep}`);
+                    maxReachedStep = parseInt(savedStep);
+                    updateProgress(maxReachedStep);
+                } else {
+                    logDebug("No saved step found in memory. Starting fresh.");
+                }
+            } catch (e) {
+                logDebug(`ERROR reading localStorage: ${e.message}`);
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const forcedStep = urlParams.get('step');
+            
+            if (forcedStep) {
+                logDebug(`URL forced step: ${forcedStep}`);
+                const data = itinerary.find(i => i.step == forcedStep);
+                if (data) showCard(data);
+            } else {
+                logDebug("Initializing GPS...");
+                initGPS();
+            }
+        };
+
         function showCard(stepData) {
+            // 1. Update Progress & Tracking
+            updateProgress(stepData.step);
+            
+            // 2. Setup the Card Content
+            const card = document.getElementById('card-container');
+            const bannerImg = document.querySelector('.banner-wrapper img');
+            
+            // 3. Fade out image briefly then swap and fade in
+            bannerImg.style.opacity = 0;
+            setTimeout(() => {
+                bannerImg.src = stepData.photo;
+                bannerImg.style.opacity = 1;
+            }, 300);
+
+            // 4. Fill text and trigger animation
             document.getElementById('home-screen').classList.add('hidden');
             document.getElementById('card-chapter').innerText = "Chapter " + stepData.step;
             document.getElementById('card-title').innerText = stepData.title;
             document.getElementById('card-message').innerText = stepData.message;
-            document.getElementById('card-container').classList.add('visible');
+            
+            // Reset animation class to trigger it again
+            card.classList.remove('visible', 'fade-in');
+            void card.offsetWidth; // Trigger reflow
+            card.classList.add('visible', 'fade-in');
         }
 
         function closeCard() {
@@ -203,8 +349,16 @@
         }
 
         window.onload = () => {
+            // Check for saved progress
+            const savedStep = localStorage.getItem('journeyMaxStep');
+            if (savedStep) {
+                maxReachedStep = parseInt(savedStep);
+                updateProgress(maxReachedStep);
+            }
+
             const urlParams = new URLSearchParams(window.location.search);
             const forcedStep = urlParams.get('step');
+            
             if (forcedStep) {
                 const data = itinerary.find(i => i.step == forcedStep);
                 if (data) showCard(data);
@@ -212,6 +366,19 @@
                 initGPS();
             }
         };
+
+        
     </script>
+
+<!-- DEBUG TOOLS - DELETE BEFORE THE TRIP -->
+<div id="debug-menu" style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); padding: 10px; border-radius: 15px; display: flex; gap: 8px; z-index: 9999; border: 1px solid #555;">
+    <button onclick="showCard(itinerary[0])" style="background: #444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Test 1</button>
+    <button onclick="showCard(itinerary[1])" style="background: #444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Test 2</button>
+    <button onclick="showCard(itinerary[2])" style="background: #444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Test 3</button>
+    <button onclick="showCard(itinerary[3])" style="background: #444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Test 4</button>
+    <button onclick="showCard(itinerary[4])" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;">Test 5 💍</button>
+    <button onclick="localStorage.clear(); location.reload();" style="background: #555; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Full Reset</button>
+</div>
+  <!-- ========================================== -->
 </body>
 </html>
