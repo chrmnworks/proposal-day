@@ -46,6 +46,11 @@
             margin-bottom: 25px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.08);
             background-color: #eee; /* Placeholder color */
+            transition: height 0.5s ease;
+        }
+
+        .banner-wrapper.portrait-mode {
+          height: 420px;
         }
 
         .banner-wrapper img {
@@ -284,6 +289,7 @@
         };
 
         function showCard(stepData) {
+            document.querySelector('.banner-wrapper').classList.add('portrait-mode');
             // 1. Update Progress & Tracking
             updateProgress(stepData.step);
             
@@ -311,6 +317,7 @@
         }
 
         function closeCard() {
+            document.querySelector('.banner-wrapper').classList.remove('portrait-mode');
             document.getElementById('card-container').classList.remove('visible');
             document.getElementById('home-screen').classList.remove('hidden');
         }
