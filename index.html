@@ -10,6 +10,8 @@
     <meta name="apple-mobile-web-app-title" content="Our Journey" />
     <link rel="manifest" href="./site.webmanifest" />
     <title>Our Journey</title>
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400&display=swap');
 
@@ -269,6 +271,68 @@
         }
 
         .picker-close-btn:hover { opacity: 0.9; }
+
+        /* ── QR Code Modal ── */
+        #qr-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #qr-modal.open { display: flex; }
+
+        .qr-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .qr-modal-content h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .qr-modal-content p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        #qr-code-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        #qr-step-info {
+            color: #999;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .qr-close-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+        }
+
+        .qr-close-btn:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -356,6 +420,18 @@
     <button onclick="showCard(itinerary[4])" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;">Test 5 💍</button>
     <button onclick="localStorage.clear(); location.reload();" style="background: #555; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Full Reset</button>
     <button onclick="openPicker()" style="background: #2c7be5; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">🎵 Songs</button>
+    <button onclick="generateAllQRCodes()" style="background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">📱 QR Codes</button>
+</div>
+
+<!-- QR Code Modal -->
+<div id="qr-modal">
+    <div class="qr-modal-content">
+        <h2>Unlock with QR Code</h2>
+        <p>Scan this code to unlock the next chapter:</p>
+        <div id="qr-code-container"></div>
+        <p id="qr-step-info"></p>
+        <button class="qr-close-btn" onclick="closeQRModal()">Close</button>
+    </div>
 </div>
 
 <script>
@@ -525,6 +601,126 @@
                 sel.appendChild(opt);
             });
         }
+    }
+
+    // ══════════════════════════════════════════
+    // QR Code Generation
+    // ══════════════════════════════════════════
+    function generateQRCode(step) {
+        // Create a URL that will unlock this step when visited
+        let baseUrl = window.location.href.split('?')[0]; // Remove any existing query params
+        if (!baseUrl.includes('http')) {
+            baseUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
+        }
+        const qrUrl = baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'step=' + step;
+        
+        console.log('QR URL:', qrUrl); // Debug log
+        
+        // Clear previous QR code
+        const container = document.getElementById('qr-code-container');
+        container.innerHTML = '';
+        
+        // Generate new QR code with simpler options
+        try {
+            new QRCode(container, {
+                text: qrUrl,
+                width: 250,
+                height: 250,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        } catch(e) {
+            console.error('QR Code generation error:', e);
+            container.innerHTML = '<p style="color: red;">Error generating QR code</p>';
+        }
+        
+        // Update step info
+        const stepData = itinerary.find(item => item.step === step);
+        document.getElementById('qr-step-info').textContent = `Chapter ${step}: "${stepData.title}"`;
+        
+        // Show modal
+        document.getElementById('qr-modal').classList.add('open');
+    }
+
+    function closeQRModal() {
+        document.getElementById('qr-modal').classList.remove('open');
+    }
+
+    function generateAllQRCodes() {
+        // Get the base URL properly
+        let baseUrl = window.location.href.split('?')[0];
+        if (!baseUrl.includes('http')) {
+            baseUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
+        }
+        
+        // Create a simple page with all QR codes for printing
+        let html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Codes - Our Journey</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .qr-page { page-break-after: always; }
+        .qr-item { 
+            background: white; 
+            padding: 30px; 
+            margin: 20px auto; 
+            max-width: 400px; 
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .qr-item h2 { color: #b8860b; margin: 0 0 10px 0; }
+        .qr-item p { color: #666; margin: 10px 0; font-size: 0.9rem; }
+        .qr-container { margin: 20px 0; }
+        @media print { body { background: white; } }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; color: #b8860b;">Our Journey - QR Code Backups</h1>
+    <p style="text-align: center; color: #999; margin-bottom: 30px;">Print these QR codes as backup unlocks in case GPS fails</p>
+`;
+        
+        itinerary.forEach(step => {
+            const qrUrl = baseUrl + '?step=' + step.step;
+            html += `
+    <div class="qr-item qr-page">
+        <h2>Chapter ${step.step}</h2>
+        <p style="font-size: 1.1rem; font-weight: bold;">${step.title}</p>
+        <div class="qr-container" id="qr-${step.step}"><\/div>
+        <p style="font-size: 0.8rem; color: #999; margin-top: 15px;">Scan to unlock</p>
+    </div>
+`;
+        });
+        
+        html += `
+    <script>
+        const baseUrl = '${baseUrl}';
+        const steps = [1, 2, 3, 4, 5];
+        steps.forEach(step => {
+            const qrUrl = baseUrl + '?step=' + step;
+            console.log('Generating QR for:', qrUrl);
+            new QRCode(document.getElementById('qr-' + step), {
+                text: qrUrl,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        });
+    <\/script>
+</body>
+</html>
+`;
+        
+        // Open in new window for printing
+        const printWindow = window.open('', '', 'width=600,height=800');
+        printWindow.document.write(html);
+        printWindow.document.close();
     }
 
     // ══════════════════════════════════════════════════
