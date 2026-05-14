@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="Our Journey" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="manifest" href="./site.webmanifest" />
     <title>Our Journey</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400&display=swap');
@@ -37,29 +37,23 @@
 
         .container { max-width: 400px; width: 100%; }
 
-        /* Banner Styling */
         .banner-wrapper {
             width: 100%;
-            height: 220px;
+            height: 420px;
             border-radius: 20px;
             overflow: hidden;
             margin-bottom: 25px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-            background-color: #eee; /* Placeholder color */
-            transition: height 0.5s ease;
-        }
-
-        .banner-wrapper.portrait-mode {
-          height: 420px;
+            background-color: #eee;
         }
 
         .banner-wrapper img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: opacity 0.5s ease-in-out;
         }
 
-        /* Main Button States */
         #main-action-btn {
             background-color: var(--locked);
             color: white;
@@ -86,7 +80,6 @@
             100% { transform: scale(1); }
         }
 
-        /* Card Styling */
         #card-container {
             display: none;
             opacity: 0;
@@ -115,277 +108,548 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background-color: #e0e0e0; /* Locked state */
+            background-color: #e0e0e0;
             transition: all 0.4s ease;
         }
 
         .dot.active {
-            background-color: var(--accent); /* Unlocked state */
+            background-color: var(--accent);
             transform: scale(1.3);
             box-shadow: 0 0 8px var(--accent);
         }
 
-        /* Fade-in Animation */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .fade-in {
-            animation: fadeIn 0.6s ease forwards;
+        .fade-in { animation: fadeIn 0.6s ease forwards; }
+
+        .dot.unlocked { cursor: pointer; background-color: var(--accent); }
+        .dot.unlocked:hover { transform: scale(1.5); }
+
+        /* ── Music Player Bar ── */
+        #music-player {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: rgba(184,134,11,0.08);
+            border: 1px solid rgba(184,134,11,0.2);
+            border-radius: 30px;
+            padding: 10px 16px;
+            margin-bottom: 18px;
+            transition: all 0.4s ease;
         }
 
-        /* Make banner image transition smoothly */
-        .banner-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: opacity 0.5s ease-in-out;
+        #music-player.visible { display: flex; }
+
+        .music-note {
+            font-size: 1.1rem;
+            animation: bounce 1.2s ease-in-out infinite alternate;
         }
 
-        /* Style for clickable dots */
-        .dot.unlocked {
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-4px); }
+        }
+
+        #song-title {
+            flex: 1;
+            font-size: 0.78rem;
+            color: var(--accent);
+            font-style: italic;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #music-toggle-btn {
+            background: none;
+            border: 1px solid rgba(184,134,11,0.3);
+            color: var(--accent);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
             cursor: pointer;
-            background-color: var(--accent);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s;
         }
 
-        .dot.unlocked:hover {
-            transform: scale(1.5);
+        #music-toggle-btn:hover { background: rgba(184,134,11,0.1); }
+
+        /* ── Song Picker Modal ── */
+        #song-picker-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 20px;
         }
+
+        #song-picker-modal.open { display: flex; }
+
+        .picker-sheet {
+            background: #fff;
+            border-radius: 20px 20px 10px 10px;
+            padding: 24px;
+            width: 100%;
+            max-width: 420px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+        }
+
+        .picker-sheet h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--accent);
+            margin: 0 0 6px 0;
+            font-size: 1.1rem;
+        }
+
+        .picker-sheet p {
+            color: #999;
+            font-size: 0.8rem;
+            margin: 0 0 16px 0;
+        }
+
+        .step-song-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .step-song-row:last-of-type { border-bottom: none; }
+
+        .step-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 60px;
+            flex-shrink: 0;
+        }
+
+        .song-select {
+            flex: 1;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-size: 0.82rem;
+            font-family: 'Lato', sans-serif;
+            color: var(--text-dark);
+            background: #fafafa;
+            cursor: pointer;
+        }
+
+        .song-select:focus { outline: none; border-color: var(--accent); }
+
+        .picker-close-btn {
+            width: 100%;
+            margin-top: 10px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 13px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .picker-close-btn:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="progress-container">
-          <div class="dot" id="dot-1"></div>
-          <div class="dot" id="dot-2"></div>
-          <div class="dot" id="dot-3"></div>
-          <div class="dot" id="dot-4"></div>
-          <div class="dot" id="dot-5"></div>
-        </div>
-        <!-- Banner Image -->
-        <div class="banner-wrapper">
-            <!-- Replace the src below with your actual photo link -->
-            <img src="IMG_5842.JPG" alt="Us">
-        </div>
-
-        <!-- Welcome Screen -->
-        <div id="home-screen">
-            <h1 style="font-family: 'Playfair Display'; margin-bottom: 15px;">Today is about us</h1>
-            <p style="margin-bottom: 35px; line-height: 1.6; color: #666;">Something will appear when we arrive somewhere special!</p>
-            
-            <button id="main-action-btn" onclick="handleButtonClick()" disabled>
-                Searching for Location...
-            </button>
-            
-            <p id="gps-status" class="status-text">Waiting for GPS signal...</p>
-        </div>
-
-        <!-- The Content Card -->
-        <div id="card-container">
-            <span id="card-chapter" style="text-transform: uppercase; letter-spacing: 2px; color: #aaa; font-size: 0.8rem;"></span>
-            <h2 id="card-title" style="margin: 15px 0 20px 0; color: var(--accent);"></h2>
-            <p id="card-message" style="line-height: 1.7; margin-bottom: 30px;"></p>
-            <button onclick="closeCard()" style="background: none; color: #999; border: 1px solid #ddd; padding: 10px 20px; border-radius: 20px;">Return to Map</button>
-        </div>
+<div class="container">
+    <div class="progress-container">
+        <div class="dot" id="dot-1"></div>
+        <div class="dot" id="dot-2"></div>
+        <div class="dot" id="dot-3"></div>
+        <div class="dot" id="dot-4"></div>
+        <div class="dot" id="dot-5"></div>
     </div>
 
-    <script>
-        let unlockedStep = null;
+    <div class="banner-wrapper">
+        <img src="IMG_5842.JPG" alt="Us">
+    </div>
 
-        const itinerary = [
-            { step: 1, lat: 32.7243, lon: -117.1249, radius: 2000, title: "When we met", message: "I was instantly attracted to your warm and welcoming energy. You have such a genuine kindness that I continue to fall in love with more every day. I still remember our 3AM talks in your common area like it was yesterday.", photo: "coffee_date.jpg" },
-            { step: 2, lat: 46.5594, lon: 7.8928, radius: 2000, title: "When I knew", message: "Look at the mountains around us. They've stood here for ages, just like my love for you.", photo: "hiking_memory.jpg" },
-            { step: 3, lat: 46.5595, lon: 7.8850, radius: 1000, title: "What I love about you", message: "Lunch at Allmendhubel. Enjoy the view, but remember you're the best view I've ever seen.", photo: "lunch_date.jpg" },
-            { step: 4, lat: 46.5935, lon: 7.9076, radius: 1500, title: "What my life looks like with you", message: "The Lauterbrunnen valley is magical, but it pales in comparison to you.", photo: "waterfall_date.jpg" },
-            { step: 5, lat: 46.5990, lon: 7.9080, radius: 500,  title: "Forever", message: "I brought you here to ask you a question. Turn around...", photo: "image.jpg" }
-        ];
+    <!-- Music Player Bar (shown inside card view) -->
+    <div id="music-player">
+        <span class="music-note">♪</span>
+        <span id="song-title">No song selected</span>
+        <button id="music-toggle-btn" onclick="toggleMusic()" title="Play/Pause">⏸</button>
+    </div>
 
-        let maxReachedStep = 0;
-
-        function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-        }
-
-        function handleButtonClick() {
-            if (unlockedStep) {
-                showCard(unlockedStep);
-            }
-        }
-
-        // --- ADD THIS HELPER FUNCTION ---
-        function logDebug(message) {
-            const statusEl = document.getElementById('gps-status');
-            // Appends the log to the status text so you can see it on your phone
-            statusEl.innerHTML += `<br><span style="color: #d35400; font-size: 10px;">[LOG] ${message}</span>`;
-            console.log("[LOG]", message);
-        }
-
-        // --- UPDATE THIS FUNCTION ---
-        function updateProgress(currentStep) {
-            logDebug(`updateProgress called with step: ${currentStep}`);
-            
-            if (currentStep > maxReachedStep) {
-                logDebug(`New max step! Upgrading from ${maxReachedStep} to ${currentStep}`);
-                maxReachedStep = currentStep;
-                
-                try {
-                    localStorage.setItem('journeyMaxStep', maxReachedStep);
-                    logDebug(`Successfully saved ${maxReachedStep} to localStorage`);
-                } catch (e) {
-                    logDebug(`ERROR saving to localStorage: ${e.message}`);
-                }
-            }
-
-            for (let i = 1; i <= 5; i++) {
-                const dot = document.getElementById(`dot-${i}`);
-                if (i <= maxReachedStep) {
-                    dot.classList.add('active', 'unlocked');
-                    dot.onclick = () => {
-                        logDebug(`Revisiting step ${i}`);
-                        const stepData = itinerary.find(item => item.step === i);
-                        showCard(stepData);
-                    };
-                } else {
-                    dot.classList.remove('active', 'unlocked');
-                    dot.onclick = null;
-                }
-            }
-        }
-
-        // --- UPDATE THIS FUNCTION ---
-        window.onload = () => {
-            logDebug("App initialized.");
-            
-            try {
-                const savedStep = localStorage.getItem('journeyMaxStep');
-                if (savedStep) {
-                    logDebug(`Found saved step in memory: ${savedStep}`);
-                    maxReachedStep = parseInt(savedStep);
-                    updateProgress(maxReachedStep);
-                } else {
-                    logDebug("No saved step found in memory. Starting fresh.");
-                }
-            } catch (e) {
-                logDebug(`ERROR reading localStorage: ${e.message}`);
-            }
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const forcedStep = urlParams.get('step');
-            
-            if (forcedStep) {
-                logDebug(`URL forced step: ${forcedStep}`);
-                const data = itinerary.find(i => i.step == forcedStep);
-                if (data) showCard(data);
-            } else {
-                logDebug("Initializing GPS...");
-                initGPS();
-            }
-        };
-
-        function showCard(stepData) {
-            document.querySelector('.banner-wrapper').classList.add('portrait-mode');
-            // 1. Update Progress & Tracking
-            updateProgress(stepData.step);
-            
-            // 2. Setup the Card Content
-            const card = document.getElementById('card-container');
-            const bannerImg = document.querySelector('.banner-wrapper img');
-            
-            // 3. Fade out image briefly then swap and fade in
-            bannerImg.style.opacity = 0;
-            setTimeout(() => {
-                bannerImg.src = stepData.photo;
-                bannerImg.style.opacity = 1;
-            }, 300);
-
-            // 4. Fill text and trigger animation
-            document.getElementById('home-screen').classList.add('hidden');
-            document.getElementById('card-chapter').innerText = "Chapter " + stepData.step;
-            document.getElementById('card-title').innerText = stepData.title;
-            document.getElementById('card-message').innerText = stepData.message;
-            
-            // Reset animation class to trigger it again
-            card.classList.remove('visible', 'fade-in');
-            void card.offsetWidth; // Trigger reflow
-            card.classList.add('visible', 'fade-in');
-        }
-
-        function closeCard() {
-            document.querySelector('.banner-wrapper').classList.remove('portrait-mode');
-            document.getElementById('card-container').classList.remove('visible');
-            document.getElementById('home-screen').classList.remove('hidden');
-        }
-
-        function initGPS() {
-            const btn = document.getElementById('main-action-btn');
-            const status = document.getElementById('gps-status');
-
-            navigator.geolocation.watchPosition((position) => {
-                const { latitude, longitude } = position.coords;
-                let found = null;
-
-                for (let item of itinerary) {
-                    if (getDistance(latitude, longitude, item.lat, item.lon) <= item.radius) {
-                        found = item;
-                        break;
-                    }
-                }
-
-                if (found) {
-                    unlockedStep = found;
-                    btn.innerText = "Surprise Unlocked! Tap to Open";
-                    btn.classList.add('unlocked');
-                    btn.disabled = false;
-                    status.innerText = "Location Verified ✔";
-                } else {
-                    unlockedStep = null;
-                    btn.innerText = "Exploring...";
-                    btn.classList.remove('unlocked');
-                    btn.disabled = true;
-                    status.innerText = "Keep walking to reach the next spot!";
-                }
-            }, (err) => {
-                status.innerText = "GPS Error: Please ensure Location is enabled.";
-            }, { enableHighAccuracy: true });
-        }
-
-        window.onload = () => {
-            // Check for saved progress
-            const savedStep = localStorage.getItem('journeyMaxStep');
-            if (savedStep) {
-                maxReachedStep = parseInt(savedStep);
-                updateProgress(maxReachedStep);
-            }
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const forcedStep = urlParams.get('step');
-            
-            if (forcedStep) {
-                const data = itinerary.find(i => i.step == forcedStep);
-                if (data) showCard(data);
-            } else {
-                initGPS();
-            }
-        };
-
+    <!-- Welcome Screen -->
+    <div id="home-screen">
+        <h1 style="font-family: 'Playfair Display'; margin-bottom: 15px;">Today we're going on a scavenger hunt!</h1>
+        <p style="margin-bottom: 35px; line-height: 1.6; color: #666;">Something will appear when we arrive at our next stop!</p>
         
-    </script>
+        <button id="main-action-btn" onclick="handleButtonClick()" disabled>
+            Searching for Location...
+        </button>
+        
+        <p id="gps-status" class="status-text">Waiting for GPS signal...</p>
+    </div>
 
-<!-- DEBUG TOOLS - DELETE BEFORE THE TRIP -->
-<div id="debug-menu" style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); padding: 10px; border-radius: 15px; display: flex; gap: 8px; z-index: 9999; border: 1px solid #555;">
+    <!-- Content Card -->
+    <div id="card-container">
+        <span id="card-chapter" style="text-transform: uppercase; letter-spacing: 2px; color: #aaa; font-size: 0.8rem;"></span>
+        <h2 id="card-title" style="margin: 15px 0 20px 0; color: var(--accent);"></h2>
+        <p id="card-message" style="line-height: 1.7; margin-bottom: 30px;"></p>
+        <button onclick="closeCard()" style="background: none; color: #999; border: 1px solid #ddd; padding: 10px 20px; border-radius: 20px;">Return to Map</button>
+    </div>
+</div>
+
+<!-- Song Picker Modal -->
+<div id="song-picker-modal">
+    <div class="picker-sheet">
+        <h3>🎵 Choose Your Songs</h3>
+        <p>Pick a song to play when each chapter reveals.</p>
+
+        <div class="step-song-row">
+            <span class="step-label">Ch. 1</span>
+            <select class="song-select" id="song-step-1" onchange="saveSongChoices()">
+                <!-- options filled by JS -->
+            </select>
+        </div>
+        <div class="step-song-row">
+            <span class="step-label">Ch. 2</span>
+            <select class="song-select" id="song-step-2" onchange="saveSongChoices()"></select>
+        </div>
+        <div class="step-song-row">
+            <span class="step-label">Ch. 3</span>
+            <select class="song-select" id="song-step-3" onchange="saveSongChoices()"></select>
+        </div>
+        <div class="step-song-row">
+            <span class="step-label">Ch. 4</span>
+            <select class="song-select" id="song-step-4" onchange="saveSongChoices()"></select>
+        </div>
+        <div class="step-song-row">
+            <span class="step-label">Ch. 5</span>
+            <select class="song-select" id="song-step-5" onchange="saveSongChoices()"></select>
+        </div>
+
+        <button class="picker-close-btn" onclick="closePicker()">Save & Close</button>
+    </div>
+</div>
+
+<!-- Debug menu - DELETE BEFORE TRIP -->
+<div id="debug-menu" style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); padding: 10px; border-radius: 15px; display: flex; gap: 8px; z-index: 9999; border: 1px solid #555; flex-wrap: wrap; justify-content: center;">
     <button onclick="showCard(itinerary[0])" style="background: #444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Test 1</button>
     <button onclick="showCard(itinerary[1])" style="background: #444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Test 2</button>
     <button onclick="showCard(itinerary[2])" style="background: #444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Test 3</button>
     <button onclick="showCard(itinerary[3])" style="background: #444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Test 4</button>
     <button onclick="showCard(itinerary[4])" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;">Test 5 💍</button>
     <button onclick="localStorage.clear(); location.reload();" style="background: #555; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Full Reset</button>
+    <button onclick="openPicker()" style="background: #2c7be5; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">🎵 Songs</button>
 </div>
-  <!-- ========================================== -->
+
+<script>
+    // ══════════════════════════════════════════════════
+    // 🎵 SONG LIBRARY — Add or remove songs here freely
+    // Format: { label: "Display Name", url: "audio file or URL" }
+    // You can use direct MP3 links, or files you upload alongside index.html
+    // ══════════════════════════════════════════════════
+    const SONG_LIBRARY = [
+        { label: "— No song —",                        url: null },
+        { label: "Perfect – Ed Sheeran",               url: "songs/perfect.mp3" },
+        { label: "Lover – Taylor Swift",               url: "songs/lover.mp3" },
+        { label: "Thousand Years – Christina Perri",   url: "songs/thousand_years.mp3" },
+        { label: "Die With A Smile – Bruno & Lady Gaga",url: "songs/die_with_a_smile.mp3" },
+        { label: "Can't Help Falling In Love – Elvis", url: "songs/cant_help_falling.mp3" },
+        { label: "All of Me – John Legend",            url: "songs/all_of_me.mp3" },
+        { label: "Marry You – Bruno Mars",             url: "songs/marry_you.mp3" },
+        { label: "At Last – Etta James",               url: "songs/at_last.mp3" },
+        { label: "Make You Feel My Love – Adele",      url: "songs/make_you_feel.mp3" },
+        { label: "Thinking Out Loud – Ed Sheeran",     url: "songs/thinking_out_loud.mp3" },
+    ];
+
+    // Default song per step (index into SONG_LIBRARY, 0 = none)
+    const DEFAULT_SONGS = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+    // ══════════════════════════════════════════════════
+    // Itinerary
+    // ══════════════════════════════════════════════════
+    let unlockedStep = null;
+    let maxReachedStep = 0;
+
+	const itinerary = [
+		{ 
+		  step: 1, lat: 32.7188, lon: -117.1622, radius: 2000, title: "When we met", message: 
+		  "I was instantly attracted to your warm and welcoming energy. You have such a genuine kindness that I continue to fall in love with more every day. Our 3AM talks in your suite are one of my favorite memories of us.", 
+		  photo: "cat_sweaters.jpg" 
+		},
+		{ 
+		  step: 2, lat: 46.5594, lon: 7.8928, radius: 2000, title: "When I knew", message: 
+		  "The time I remember falling hard for you was the first Summer you visited me in Petaluma. I loved showing you around my hometown and . Driving up to Sonoma Mountain together felt like being with someone I had already known my whole life.", 
+		  photo: "sonoma_mountain.jpg" 
+		},
+		{ 
+		  step: 3, lat: 46.5595, lon: 7.8850, radius: 1000, title: "What I love about you", message:
+		  "", 
+		  photo: "lunch_date.jpg" 
+		},
+		{
+		  step: 4, lat: 46.5935, lon: 7.9076, radius: 1500, title: "What my life looks like with you", message: 
+		  "", 
+		  photo: "waterfall_date.jpg" 
+		},
+		{ 
+		  step: 5, lat: 46.5990, lon: 7.9080, radius: 500,  title: "Forever", message: "I brought you here to ask you a question. Turn around...", photo: "image.jpg" 
+		}
+	];
+
+    // ══════════════════════════════════════════════════
+    // Audio engine
+    // ══════════════════════════════════════════════════
+    let currentAudio = null;
+    let songChoices = { ...DEFAULT_SONGS }; // step -> SONG_LIBRARY index
+
+    function loadSongChoices() {
+        try {
+            const saved = localStorage.getItem('journeySongChoices');
+            if (saved) songChoices = { ...DEFAULT_SONGS, ...JSON.parse(saved) };
+        } catch(e) {}
+    }
+
+    function saveSongChoices() {
+        for (let i = 1; i <= 5; i++) {
+            const sel = document.getElementById(`song-step-${i}`);
+            if (sel) songChoices[i] = parseInt(sel.value);
+        }
+        try { localStorage.setItem('journeySongChoices', JSON.stringify(songChoices)); } catch(e) {}
+    }
+
+    function playSongForStep(step) {
+        stopMusic();
+
+        const idx = songChoices[step] ?? 0;
+        const song = SONG_LIBRARY[idx];
+        if (!song || !song.url) {
+            hideMusicPlayer();
+            return;
+        }
+
+        currentAudio = new Audio(song.url);
+        currentAudio.loop = true;
+        currentAudio.volume = 0;
+        currentAudio.play().catch(() => {
+            // Autoplay blocked — show player in paused state so user can tap
+            showMusicPlayer(song.label, true);
+        });
+
+        // Fade in
+        let vol = 0;
+        const fadeIn = setInterval(() => {
+            vol = Math.min(vol + 0.05, 0.85);
+            if (currentAudio) currentAudio.volume = vol;
+            if (vol >= 0.85) clearInterval(fadeIn);
+        }, 80);
+
+        showMusicPlayer(song.label, false);
+    }
+
+    function stopMusic() {
+        if (!currentAudio) return;
+        const audio = currentAudio;
+        currentAudio = null;
+        // Fade out
+        let vol = audio.volume;
+        const fadeOut = setInterval(() => {
+            vol = Math.max(vol - 0.07, 0);
+            audio.volume = vol;
+            if (vol <= 0) { clearInterval(fadeOut); audio.pause(); }
+        }, 60);
+        hideMusicPlayer();
+    }
+
+    function toggleMusic() {
+        if (!currentAudio) return;
+        const btn = document.getElementById('music-toggle-btn');
+        if (currentAudio.paused) {
+            currentAudio.play();
+            btn.textContent = '⏸';
+        } else {
+            currentAudio.pause();
+            btn.textContent = '▶';
+        }
+    }
+
+    function showMusicPlayer(label, paused) {
+        const player = document.getElementById('music-player');
+        document.getElementById('song-title').textContent = label;
+        document.getElementById('music-toggle-btn').textContent = paused ? '▶' : '⏸';
+        player.classList.add('visible');
+    }
+
+    function hideMusicPlayer() {
+        document.getElementById('music-player').classList.remove('visible');
+    }
+
+    // ══════════════════════════════════════════════════
+    // Song Picker UI
+    // ══════════════════════════════════════════════════
+    function openPicker() {
+        populateSelects();
+        document.getElementById('song-picker-modal').classList.add('open');
+    }
+
+    function closePicker() {
+        saveSongChoices();
+        document.getElementById('song-picker-modal').classList.remove('open');
+    }
+
+    function populateSelects() {
+        for (let i = 1; i <= 5; i++) {
+            const sel = document.getElementById(`song-step-${i}`);
+            sel.innerHTML = '';
+            SONG_LIBRARY.forEach((song, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = song.label;
+                if ((songChoices[i] ?? 0) === idx) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        }
+    }
+
+    // ══════════════════════════════════════════════════
+    // Core app logic
+    // ══════════════════════════════════════════════════
+    function getDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    }
+
+    function handleButtonClick() {
+        if (unlockedStep) showCard(unlockedStep);
+    }
+
+    function updateProgress(currentStep) {
+        if (currentStep > maxReachedStep) {
+            maxReachedStep = currentStep;
+            try { localStorage.setItem('journeyMaxStep', maxReachedStep); } catch(e) {}
+        }
+        for (let i = 1; i <= 5; i++) {
+            const dot = document.getElementById(`dot-${i}`);
+            if (i <= maxReachedStep) {
+                dot.classList.add('active', 'unlocked');
+                dot.onclick = () => {
+                    const stepData = itinerary.find(item => item.step === i);
+                    showCard(stepData);
+                };
+            } else {
+                dot.classList.remove('active', 'unlocked');
+                dot.onclick = null;
+            }
+        }
+    }
+
+    function showCard(stepData) {
+        updateProgress(stepData.step);
+
+        const card = document.getElementById('card-container');
+        const bannerImg = document.querySelector('.banner-wrapper img');
+
+        bannerImg.style.opacity = 0;
+        setTimeout(() => {
+            bannerImg.src = stepData.photo;
+            bannerImg.style.opacity = 1;
+        }, 300);
+
+        document.getElementById('home-screen').classList.add('hidden');
+        document.getElementById('card-chapter').innerText = "Chapter " + stepData.step;
+        document.getElementById('card-title').innerText = stepData.title;
+        document.getElementById('card-message').innerText = stepData.message;
+
+        card.classList.remove('visible', 'fade-in');
+        void card.offsetWidth;
+        card.classList.add('visible', 'fade-in');
+
+        // 🎵 Play the chosen song
+        playSongForStep(stepData.step);
+    }
+
+    function closeCard() {
+        document.getElementById('card-container').classList.remove('visible');
+        document.getElementById('home-screen').classList.remove('hidden');
+        stopMusic();
+    }
+
+    function initGPS() {
+        const btn = document.getElementById('main-action-btn');
+        const status = document.getElementById('gps-status');
+
+        navigator.geolocation.watchPosition((position) => {
+            const { latitude, longitude } = position.coords;
+            let found = null;
+            console.log(`My coords: ${latitude}, ${longitude}`);
+            itinerary.forEach(item => {
+              console.log(`Step ${item.step}: ${getDistance(latitude, longitude, item.lat, item.lon).toFixed(0)}m away`);
+            });
+            for (let item of itinerary) {
+                if (getDistance(latitude, longitude, item.lat, item.lon) <= item.radius) {
+                    found = item;
+                    break;
+                }
+            }
+
+            if (found) {
+                unlockedStep = found;
+                btn.innerText = "Surprise Unlocked! Tap to Open";
+                btn.classList.add('unlocked');
+                btn.disabled = false;
+                status.innerText = "Location Verified ✔";
+            } else {
+                unlockedStep = null;
+                btn.innerText = "Exploring...";
+                btn.classList.remove('unlocked');
+                btn.disabled = true;
+                status.innerText = "Keep walking to reach the next spot!";
+            }
+        }, () => {
+            status.innerText = "GPS Error: Please ensure Location is enabled.";
+        }, { enableHighAccuracy: true });
+    }
+
+    window.onload = () => {
+        loadSongChoices();
+
+        try {
+            const savedStep = localStorage.getItem('journeyMaxStep');
+            if (savedStep) {
+                maxReachedStep = parseInt(savedStep);
+                updateProgress(maxReachedStep);
+            }
+        } catch(e) {}
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const forcedStep = urlParams.get('step');
+
+        if (forcedStep) {
+            const data = itinerary.find(i => i.step == forcedStep);
+            if (data) showCard(data);
+        } else {
+            initGPS();
+        }
+    };
+</script>
 </body>
 </html>
