@@ -591,6 +591,14 @@
         document.getElementById('card-container').classList.remove('visible');
         document.getElementById('home-screen').classList.remove('hidden');
         stopMusic();
+        
+        // Reset banner to first picture
+        const bannerImg = document.querySelector('.banner-wrapper img');
+        bannerImg.style.opacity = 0;
+        setTimeout(() => {
+            bannerImg.src = 'IMG_5842.JPG';
+            bannerImg.style.opacity = 1;
+        }, 300);
     }
 
     function initGPS() {
