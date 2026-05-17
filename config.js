@@ -31,7 +31,7 @@ const LOCATIONS = {
     northFace:    { lat: 46.553952, lon: 7.886537, radius: 1000 },
     allmendhubel: { lat: 46.564198, lon: 7.889062, radius: 1000 },
     proposal:     { lat: 46.599000, lon: 7.908000, radius: 500 },  
-    coffee:       { lat: 46.625000, lon: 8.040000, radius: 500 }   // Placeholder: Update with your coffee spot
+    coffee:       { lat: 46.624592, lon: 8.043381, radius: 500 }   // Placeholder: Update with your coffee spot
 };
 
 // ══════════════════════════════════════════════════
