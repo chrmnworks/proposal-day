@@ -61,7 +61,7 @@ const CHAPTERS = [
     {
         title: "Forever",
         message: "We made it to our final stop! Ready for our next adventure?",
-        photo: "forever.jpg"
+        photo: "forever.JPG"
     }
 ];
 
