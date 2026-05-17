@@ -89,6 +89,7 @@
             overflow: hidden;
             margin-bottom: 25px;
             background-color: #eee;
+            position: relative;
         }
 
         .banner-wrapper img {
@@ -419,6 +420,29 @@
         }
 
         .qr-close-btn:hover { opacity: 0.9; }
+
+        /* ── Banner loading spinner ── */
+        .banner-wrapper.banner-loading {
+            background-color: #f0ece8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .banner-spinner {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            border: 4px solid rgba(184, 134, 11, 0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            z-index: 2;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -479,7 +503,7 @@
 
     <div id="home-card">
     <div class="banner-wrapper">
-        <img src="scavenger.jpg" alt="Us">
+        <img src="scavenger.jpg" alt="">
     </div>
 
     <div id="music-player">
@@ -789,6 +813,7 @@
 <head>
     <title>QR Codes - Our Journey</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+        
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
         .qr-page { page-break-after: always; }
@@ -805,6 +830,35 @@
         .qr-item p { color: #666; margin: 10px 0; font-size: 0.9rem; }
         .qr-container { margin: 20px 0; }
         @media print { body { background: white; } }
+        /* ── Card Loading Shimmer ── */
+        .banner-loading {
+            position: relative;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .banner-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 36px;
+            height: 36px;
+            border: 3px solid rgba(184,134,11,0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -891,16 +945,33 @@
 
         const card = document.getElementById('card-container');
         const bannerImg = document.querySelector('.banner-wrapper img');
+        const bannerWrapper = document.querySelector('.banner-wrapper');
 
-        // Hide the card and fade out the current image while we prepare
+        // Hide card and fade out image while preparing
         card.classList.remove('visible', 'fade-in');
         document.getElementById('home-screen').classList.add('hidden');
         bannerImg.style.opacity = 0;
+        bannerImg.src = ''; // Clear old image immediately so it doesn't show through
 
-        // Pre-load the new image before showing anything
+        // Show loading shimmer + spinner
+        bannerWrapper.classList.add('banner-loading');
+        let spinner = document.createElement('div');
+        spinner.className = 'banner-spinner';
+        bannerWrapper.appendChild(spinner);
+
+        // Show card shell immediately so spinner is visible, but hide text until image loads
+        document.getElementById('card-chapter').innerText = '';
+        document.getElementById('card-title').innerText = '';
+        document.getElementById('card-message').innerText = '';
+        void card.offsetWidth;
+        card.classList.add('visible', 'fade-in');
+
         const preloader = new Image();
         preloader.onload = () => {
-            // ✅ Image is ready — now update everything at once
+            // Remove shimmer
+            bannerWrapper.classList.remove('banner-loading');
+            if (spinner.parentNode) spinner.parentNode.removeChild(spinner);
+
             bannerImg.src = stepData.photo;
             if (stepData.step === 1 || stepData.step === 2) {
                 bannerImg.classList.add('crop-top');
@@ -908,31 +979,24 @@
                 bannerImg.classList.remove('crop-top');
             }
 
-            // Update text
+            // Reveal image and text together
+            bannerImg.style.opacity = 1;
             document.getElementById('card-chapter').innerText = "Chapter " + stepData.step;
             document.getElementById('card-title').innerText = stepData.title;
             document.getElementById('card-message').innerText = stepData.message;
 
-            // Reveal image and card together
-            bannerImg.style.opacity = 1;
-            void card.offsetWidth;
-            card.classList.add('visible', 'fade-in');
-
-            // 🎵 Start music only after card is visible
             playSongForStep(stepData.step);
         };
 
         preloader.onerror = () => {
-            // Image failed to load — show card anyway with a fallback
+            bannerWrapper.classList.remove('banner-loading');
+            if (spinner.parentNode) spinner.parentNode.removeChild(spinner);
             document.getElementById('card-chapter').innerText = "Chapter " + stepData.step;
             document.getElementById('card-title').innerText = stepData.title;
             document.getElementById('card-message').innerText = stepData.message;
-            void card.offsetWidth;
-            card.classList.add('visible', 'fade-in');
             playSongForStep(stepData.step);
         };
 
-        // Kick off the image load
         preloader.src = stepData.photo;
     }
 
@@ -995,33 +1059,42 @@
     }
 
     window.onload = () => {
-            loadSongChoices();
+        loadSongChoices();
 
-            // Check config to show or hide the debug menu layout
-            if (typeof CONFIG !== 'undefined' && CONFIG.showDebugMenu) {
-                document.getElementById('debug-menu').style.display = 'flex';
-            } else {
-                document.getElementById('debug-menu').style.display = 'none';
+        if (typeof CONFIG !== 'undefined' && CONFIG.showDebugMenu) {
+            document.getElementById('debug-menu').style.display = 'flex';
+        } else {
+            document.getElementById('debug-menu').style.display = 'none';
+        }
+
+        try {
+            const savedStep = localStorage.getItem('journeyMaxStep');
+            if (savedStep) {
+                maxReachedStep = parseInt(savedStep);
+                updateProgress(maxReachedStep);
             }
+        } catch(e) {}
 
-            try {
-                const savedStep = localStorage.getItem('journeyMaxStep');
-                if (savedStep) {
-                    maxReachedStep = parseInt(savedStep);
-                    updateProgress(maxReachedStep);
-                }
-            } catch(e) {}
+        const urlParams = new URLSearchParams(window.location.search);
+        const forcedStep = urlParams.get('step');
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const forcedStep = urlParams.get('step');
-
-            if (forcedStep) {
-                const data = itinerary.find(i => i.step == forcedStep);
-                if (data) showCard(data);
-            } else {
-                initGPS();
+        if (forcedStep) {
+            const data = itinerary.find(i => i.step == forcedStep);
+            if (data) {
+                // 🔑 Unlock the step but stay on home screen — let them tap the button
+                unlockedStep = data;
+                updateProgress(data.step);
+                const btn = document.getElementById('main-action-btn');
+                btn.innerText = "Surprise Unlocked! Tap to Open";
+                btn.classList.add('unlocked');
+                btn.disabled = false;
+                document.getElementById('gps-status').innerText = "Location Verified ✔";
+                // Don't call initGPS() — the URL already unlocked the step
             }
-        };
+        } else {
+            initGPS();
+        }
+    };
 </script>
 </body>
 </html>
