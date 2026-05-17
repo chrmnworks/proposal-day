@@ -892,45 +892,70 @@
         const card = document.getElementById('card-container');
         const bannerImg = document.querySelector('.banner-wrapper img');
 
+        // Hide the card and fade out the current image while we prepare
+        card.classList.remove('visible', 'fade-in');
+        document.getElementById('home-screen').classList.add('hidden');
         bannerImg.style.opacity = 0;
-        setTimeout(() => {
+
+        // Pre-load the new image before showing anything
+        const preloader = new Image();
+        preloader.onload = () => {
+            // ✅ Image is ready — now update everything at once
             bannerImg.src = stepData.photo;
-            
-            // 🌟 DYNAMICALLY APPLY CROP ONLY TO STEPS 1 AND 2
             if (stepData.step === 1 || stepData.step === 2) {
                 bannerImg.classList.add('crop-top');
             } else {
                 bannerImg.classList.remove('crop-top');
             }
 
+            // Update text
+            document.getElementById('card-chapter').innerText = "Chapter " + stepData.step;
+            document.getElementById('card-title').innerText = stepData.title;
+            document.getElementById('card-message').innerText = stepData.message;
+
+            // Reveal image and card together
             bannerImg.style.opacity = 1;
-        }, 300);
+            void card.offsetWidth;
+            card.classList.add('visible', 'fade-in');
 
-        document.getElementById('home-screen').classList.add('hidden');
-        document.getElementById('card-chapter').innerText = "Chapter " + stepData.step;
-        document.getElementById('card-title').innerText = stepData.title;
-        document.getElementById('card-message').innerText = stepData.message;
+            // 🎵 Start music only after card is visible
+            playSongForStep(stepData.step);
+        };
 
-        card.classList.remove('visible', 'fade-in');
-        void card.offsetWidth;
-        card.classList.add('visible', 'fade-in');
+        preloader.onerror = () => {
+            // Image failed to load — show card anyway with a fallback
+            document.getElementById('card-chapter').innerText = "Chapter " + stepData.step;
+            document.getElementById('card-title').innerText = stepData.title;
+            document.getElementById('card-message').innerText = stepData.message;
+            void card.offsetWidth;
+            card.classList.add('visible', 'fade-in');
+            playSongForStep(stepData.step);
+        };
 
-        // 🎵 Play the chosen song
-        playSongForStep(stepData.step);
+        // Kick off the image load
+        preloader.src = stepData.photo;
     }
 
     function closeCard() {
         document.getElementById('card-container').classList.remove('visible');
         document.getElementById('home-screen').classList.remove('hidden');
         stopMusic();
-        
-        // Reset banner to first picture
+
         const bannerImg = document.querySelector('.banner-wrapper img');
         bannerImg.style.opacity = 0;
-        setTimeout(() => {
+
+        const preloader = new Image();
+        preloader.onload = () => {
             bannerImg.src = 'scavenger.jpg';
-            bannerImg.style.opacity = 1;
-        }, 300);
+            bannerImg.classList.remove('crop-top');   // ← ensure clean state
+            bannerImg.style.opacity = '';              // ← clear inline style, let CSS take over
+        };
+        preloader.onerror = () => {
+            bannerImg.src = 'scavenger.jpg';
+            bannerImg.classList.remove('crop-top');
+            bannerImg.style.opacity = '';
+        };
+        preloader.src = 'scavenger.jpg';
     }
 
     function initGPS() {
