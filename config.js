@@ -83,7 +83,7 @@ function getItinerary() {
         routeNodes = [
             LOCATIONS.murrenCableCar,
             LOCATIONS.allmendhubel,
-            LOCATIONS.coffee,
+            selectedWaterfall,
             LOCATIONS.energieWarme,
             LOCATIONS.proposal
         ];
