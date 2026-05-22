@@ -1048,6 +1048,7 @@
                     btn.classList.remove('unlocked');
                     btn.disabled = true;
                     status.innerText = `${Math.round(dist)}m from the next stop`;
+                    status.innerText = `Watching step ${nextStep?.step} | maxReached: ${maxReachedStep}`;
                 }
             }
     
