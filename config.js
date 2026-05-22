@@ -16,7 +16,7 @@ const CONFIG = {
     waterfallPreference: 'staubbach',
     
     // Set to true to show the debug buttons, or false to hide them
-    showDebugMenu: false 
+    showDebugMenu: true 
 };
 
 // ... [Keep the rest of your LOCATIONS, CHAPTERS, and getItinerary() code here] ...
