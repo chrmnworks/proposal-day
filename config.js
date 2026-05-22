@@ -13,7 +13,7 @@ const CONFIG = {
     activeRoute: 1, 
     
     // Set to 'trummelbach' or 'staubbach'
-    waterfallPreference: 'trummelbach',
+    waterfallPreference: 'staubbach',
     
     // Set to true to show the debug buttons, or false to hide them
     showDebugMenu: true 
