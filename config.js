@@ -3,7 +3,7 @@
 const CONFIG = {
     activeRoute: 1,
     waterfallPreference: 'trummelbach', // Retaining for Route 2
-    showDebugMenu: false
+    showDebugMenu: true
 };
 
 const LOCATIONS = {
