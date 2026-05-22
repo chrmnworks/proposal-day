@@ -16,7 +16,7 @@ const CONFIG = {
     waterfallPreference: 'staubbach',
     
     // Set to true to show the debug buttons, or false to hide them
-    showDebugMenu: true 
+    showDebugMenu: false 
 };
 
 // ... [Keep the rest of your LOCATIONS, CHAPTERS, and getItinerary() code here] ...
@@ -28,7 +28,7 @@ const CONFIG = {
 //    allmendhubel: { lat: 46.564198, lon: 7.889062, radius: 1000 },
 const LOCATIONS = {
     energieWarme: { lat: 46.59486, lon: 7.90836, radius: 750 },
-    murrenCableCar: { lat: 46.54801, lon: 7.89324, radius: 750 },
+    murrenCableCar: { lat: 46.62328, lon: 8.03789, radius: 750 },
     trummelbach:  { lat: 46.569663, lon: 7.914125, radius: 1000 },
     staubbach:    { lat: 46.589985, lon: 7.905271, radius: 1000 }, // Viewpoint alt: 46.595287, 7.908129
     northFace:    { lat: 46.553952, lon: 7.886537, radius: 1000 },
