@@ -1059,6 +1059,11 @@
     }
 
     window.onload = () => {
+
+        // ADD THESE TWO LINES:
+        try { maxReachedStep = parseInt(localStorage.getItem('journeyMaxStep')) || 0; } catch(e) { maxReachedStep = 0; }
+        updateProgress(maxReachedStep);
+
         loadSongChoices();
 
         if (typeof CONFIG !== 'undefined' && CONFIG.showDebugMenu) {
