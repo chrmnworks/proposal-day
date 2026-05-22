@@ -1027,6 +1027,9 @@
         const status = document.getElementById('gps-status');
 
         navigator.geolocation.watchPosition((position) => {
+            const nextStep = itinerary.find(s => s.step === maxReachedStep + 1);
+            document.getElementById('gps-status').innerText = `Watching step ${nextStep?.step} | maxReached: ${maxReachedStep}`;
+
             const { latitude, longitude } = position.coords;
             console.log(`My coords: ${latitude}, ${longitude}`);
             itinerary.forEach(item => {
