@@ -1033,15 +1033,12 @@
             itinerary.forEach(item => {
               console.log(`Step ${item.step}: ${getDistance(latitude, longitude, item.lat, item.lon).toFixed(0)}m away`);
             });
-            for (let item of itinerary) {
-                if (getDistance(latitude, longitude, item.lat, item.lon) <= item.radius) {
-                    found = item;
-                    break;
-                }
-            }
+       const nextStep = itinerary.find(s => s.step === maxReachedStep + 1);
 
-            if (found) {
-                unlockedStep = found;
+        if (nextStep) {
+            const dist = getDistance(latitude, longitude, nextStep.lat, nextStep.lon);
+            if (dist <= nextStep.radius) {
+                unlockedStep = nextStep;
                 btn.innerText = "Surprise Unlocked! Tap to Open";
                 btn.classList.add('unlocked');
                 btn.disabled = false;
@@ -1051,19 +1048,16 @@
                 btn.innerText = "Exploring...";
                 btn.classList.remove('unlocked');
                 btn.disabled = true;
-                status.innerText = "Keep walking to reach the next spot!";
+                status.innerText = `${Math.round(dist)}m from the next stop`;
             }
+        }
+
         }, () => {
             status.innerText = "GPS Error: Please ensure Location is enabled.";
         }, { enableHighAccuracy: true });
     }
 
     window.onload = () => {
-
-        // ADD THESE TWO LINES:
-        try { maxReachedStep = parseInt(localStorage.getItem('journeyMaxStep')) || 0; } catch(e) { maxReachedStep = 0; }
-        updateProgress(maxReachedStep);
-
         loadSongChoices();
 
         if (typeof CONFIG !== 'undefined' && CONFIG.showDebugMenu) {
