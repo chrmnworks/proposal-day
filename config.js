@@ -25,7 +25,8 @@ const CONFIG = {
 // GPS COORDINATES
 // ══════════════════════════════════════════════════
 const LOCATIONS = {
-    energieWarme: { lat: 46.59486, lon: 7.90836, radius: 500 },
+    energieWarme: { lat: 46.59486, lon: 7.90836, radius: 750 },
+    murrenCableCar: { lat: 46.54801, lon: 7.89324, radius: 750 },
     trummelbach:  { lat: 46.569663, lon: 7.914125, radius: 1000 },
     staubbach:    { lat: 46.589985, lon: 7.905271, radius: 1000 }, // Viewpoint alt: 46.595287, 7.908129
     northFace:    { lat: 46.553952, lon: 7.886537, radius: 1000 },
@@ -78,10 +79,10 @@ function getItinerary() {
     if (CONFIG.activeRoute === 1) {
         // Scenario 1: Energie Warme -> Waterfall -> North Face -> Allmendhubel -> Proposal
         routeNodes = [
-            LOCATIONS.energieWarme,
-            selectedWaterfall,
-            LOCATIONS.northFace,
+            LOCATIONS.murrenCableCar,
             LOCATIONS.allmendhubel,
+            LOCATIONS.coffee,
+            LOCATIONS.energieWarme,
             LOCATIONS.proposal
         ];
     } else if (CONFIG.activeRoute === 2) {
