@@ -29,6 +29,7 @@ const CONFIG = {
 const LOCATIONS = {
     energieWarme: { lat: 46.59486, lon: 7.90836, radius: 750 },
     murrenCableCar: { lat: 46.558, lon: 7.89, radius: 1500 },
+    hotel: { lat: 46.62319, lon: 8.03786, radius: 750 },
     trummelbach:  { lat: 46.569663, lon: 7.914125, radius: 1000 },
     staubbach:    { lat: 46.589985, lon: 7.905271, radius: 1000 }, // Viewpoint alt: 46.595287, 7.908129
     northFace:    { lat: 46.553952, lon: 7.886537, radius: 1000 },
@@ -83,7 +84,7 @@ function getItinerary() {
         routeNodes = [
             LOCATIONS.murrenCableCar,
             LOCATIONS.allmendhubel,
-            selectedWaterfall,
+            LOCATIONS.hotel,
             LOCATIONS.energieWarme,
             LOCATIONS.proposal
         ];
