@@ -33,7 +33,7 @@ const LOCATIONS = {
     staubbach:    { lat: 46.589985, lon: 7.905271, radius: 1000 }, // Viewpoint alt: 46.595287, 7.908129
     northFace:    { lat: 46.553952, lon: 7.886537, radius: 1000 },
     allmendhubel: { lat: 46.564198, lon: 7.889062, radius: 1000 },
-    proposal:     { lat: 46.599000, lon: 7.908000, radius: 500 },  
+    proposal:     { lat: 46.5826944,  lon: 7.9099167, radius: 500 },  
     coffee:       { lat: 46.624592, lon: 8.043381, radius: 500 }   // Placeholder: Update with your coffee spot
 };
 
