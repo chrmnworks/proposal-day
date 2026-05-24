@@ -859,14 +859,12 @@
         const SWIPE_THRESHOLD = 50;
         const AXIS_LOCK = 30;
     
-        const card = document.getElementById('card-container');
-    
-        card.addEventListener('touchstart', e => {
+        document.addEventListener('touchstart', e => {
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
         }, { passive: true });
     
-        card.addEventListener('touchend', e => {
+        document.addEventListener('touchend', e => {
             if (touchStartX === null) return;
             const dx = e.changedTouches[0].clientX - touchStartX;
             const dy = e.changedTouches[0].clientY - touchStartY;
