@@ -954,13 +954,13 @@
     // ══════════════════════════════════════════════════
     window.onload = () => {
         loadSongChoices();
-
+    
         if (typeof CONFIG !== 'undefined' && CONFIG.showDebugMenu) {
             document.getElementById('debug-menu').style.display = 'flex';
         } else {
             document.getElementById('debug-menu').style.display = 'none';
         }
-
+    
         // Restore saved progress
         try {
             const savedStep = localStorage.getItem('journeyMaxStep');
@@ -969,17 +969,30 @@
                 updateProgress(maxReachedStep);
             }
         } catch(e) {}
-
+    
+        // ── ALL STEPS UNLOCKED MODE ──────────────────────
+        if (typeof CONFIG !== 'undefined' && CONFIG.allStepsUnlocked) {
+            maxReachedStep = itinerary.length;
+            updateProgress(maxReachedStep);
+    
+            const btn = document.getElementById('main-action-btn');
+            btn.textContent = 'Begin Our Journey ✨';
+            btn.disabled = false;
+            btn.onclick = () => showCard(itinerary[0]);
+    
+            document.getElementById('gps-status').style.display = 'none';
+            return; // skip QR and GPS entirely
+        }
+    
         // QR / forced step unlock
         const urlParams  = new URLSearchParams(window.location.search);
         const forcedStep = urlParams.get('step');
-
+    
         if (forcedStep) {
             const data = itinerary.find(i => i.step == forcedStep);
-            // unlockStep guards against out-of-order QR scans automatically
             if (data) unlockStep(data);
         }
-
+    
         // Always start GPS — needed for distance display and future steps
         initGPS();
     };
