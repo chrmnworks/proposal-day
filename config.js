@@ -9,17 +9,11 @@
 // SCENARIO SETTINGS
 // ══════════════════════════════════════════════════
 const CONFIG = {
-    // Set to 1 for Scenario 1, or 2 for Scenario 2
-    activeRoute: 1, 
-    
-    // Set to 'trummelbach' or 'staubbach'
-    waterfallPreference: 'staubbach',
-    
-    // Set to true to show the debug buttons, or false to hide them
-    showDebugMenu: false 
+  activeRoute: 1,
+  waterfallPreference: 'staubbach',
+  showDebugMenu: true,
+  allStepsUnlocked: true  // ← set to true to skip GPS and unlock all chapters immediately
 };
-
-// ... [Keep the rest of your LOCATIONS, CHAPTERS, and getItinerary() code here] ...
 
 // ══════════════════════════════════════════════════
 // GPS COORDINATES
