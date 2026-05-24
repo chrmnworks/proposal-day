@@ -11,7 +11,7 @@
 const CONFIG = {
   activeRoute: 1,
   waterfallPreference: 'staubbach',
-  showDebugMenu: true,
+  showDebugMenu: false,
   allStepsUnlocked: true  // ← set to true to skip GPS and unlock all chapters immediately
 };
 
