@@ -903,6 +903,11 @@
             document.getElementById('card-title').innerText   = stepData.title;
             document.getElementById('card-message').innerText = stepData.message;
             playSongForStep(stepData.step);
+            // Show/hide nav buttons based on allStepsUnlocked mode
+            const inUnlockedMode = typeof CONFIG !== 'undefined' && CONFIG.allStepsUnlocked;
+            document.getElementById('card-prev-btn').style.display = (inUnlockedMode && stepData.step > 1) ? '' : 'none';
+            document.getElementById('card-next-btn').style.display = (inUnlockedMode && stepData.step < itinerary.length) ? '' : 'none';
+
         };
         preloader.src = stepData.photo;
     }
