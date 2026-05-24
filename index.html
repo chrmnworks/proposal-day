@@ -776,6 +776,7 @@
 
         html += `
     <script>
+        let currentCardStep = null;
         const steps = [1, 2, 3, 4, 5];
         steps.forEach(step => {
             new QRCode(document.getElementById('qr-' + step), {
@@ -847,11 +848,9 @@
     }
     
     function navigateCard(direction) {
-        const currentStep = parseInt(document.getElementById('card-chapter').innerText.replace('Chapter ', ''));
-        const nextStep = itinerary.find(s => s.step === currentStep + direction);
+        const nextStep = itinerary.find(s => s.step === currentCardStep + direction);
         if (nextStep) showCard(nextStep);
     }
-
 
     function showCard(stepData) {
         const card        = document.getElementById('card-container');
@@ -876,6 +875,7 @@
         card.classList.add('visible', 'fade-in');
 
         const preloader   = new Image();
+        currentCardStep = stepData.step;
         preloader.onload  = () => {
             bannerWrapper.classList.remove('banner-loading');
             if (spinner.parentNode) spinner.parentNode.removeChild(spinner);
