@@ -851,6 +851,38 @@
         const nextStep = itinerary.find(s => s.step === currentCardStep + direction);
         if (nextStep) showCard(nextStep);
     }
+    
+    // ── Swipe navigation ──────────────────────────────
+    (function() {
+        let touchStartX = null;
+        let touchStartY = null;
+        const SWIPE_THRESHOLD = 50;
+        const AXIS_LOCK = 30;
+    
+        const card = document.getElementById('card-container');
+    
+        card.addEventListener('touchstart', e => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+    
+        card.addEventListener('touchend', e => {
+            if (touchStartX === null) return;
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            const dy = e.changedTouches[0].clientY - touchStartY;
+            touchStartX = null;
+            touchStartY = null;
+    
+            // Ignore if mostly vertical (user is scrolling)
+            if (Math.abs(dy) > AXIS_LOCK) return;
+            if (Math.abs(dx) < SWIPE_THRESHOLD) return;
+    
+            if (typeof CONFIG !== 'undefined' && CONFIG.allStepsUnlocked) {
+                navigateCard(dx < 0 ? 1 : -1); // swipe left = next, swipe right = prev
+            }
+        }, { passive: true });
+    })();
+
 
     function showCard(stepData) {
         const card        = document.getElementById('card-container');
