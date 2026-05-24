@@ -513,7 +513,11 @@
         <span id="card-chapter" style="text-transform: uppercase; letter-spacing: 2px; color: #aaa; font-size: 0.8rem;"></span>
         <h2 id="card-title" style="margin: 15px 0 20px 0; color: var(--accent);"></h2>
         <p id="card-message" style="line-height: 1.7; margin-bottom: 30px;"></p>
-        <button onclick="closeCard()" style="background: none; color: #999; border: 1px solid #ddd; padding: 10px 20px; border-radius: 20px;">Return to Map</button>
+         <div id="card-nav" style="display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap;">
+            <button id="card-prev-btn" onclick="navigateCard(-1)" style="background: none; color: #999; border: 1px solid #ddd; padding: 10px 20px; border-radius: 20px;">← Previous</button>
+            <button onclick="closeCard()" style="background: none; color: #999; border: 1px solid #ddd; padding: 10px 20px; border-radius: 20px;">Return to Map</button>
+            <button id="card-next-btn" onclick="navigateCard(1)" style="background: none; color: #999; border: 1px solid #ddd; padding: 10px 20px; border-radius: 20px;">Next →</button>
+        </div>
     </div>
 </div>
 
@@ -841,6 +845,13 @@
         btn.disabled = false;
         document.getElementById('gps-status').innerText = "Location Verified ✔";
     }
+    
+    function navigateCard(direction) {
+        const currentStep = parseInt(document.getElementById('card-chapter').innerText.replace('Chapter ', ''));
+        const nextStep = itinerary.find(s => s.step === currentStep + direction);
+        if (nextStep) showCard(nextStep);
+    }
+
 
     function showCard(stepData) {
         const card        = document.getElementById('card-container');
@@ -879,6 +890,11 @@
             document.getElementById('card-title').innerText   = stepData.title;
             document.getElementById('card-message').innerText = stepData.message;
             playSongForStep(stepData.step);
+            // Show/hide nav buttons based on allStepsUnlocked mode
+            const inUnlockedMode = typeof CONFIG !== 'undefined' && CONFIG.allStepsUnlocked;
+            document.getElementById('card-prev-btn').style.display = (inUnlockedMode && stepData.step > 1) ? '' : 'none';
+            document.getElementById('card-next-btn').style.display = (inUnlockedMode && stepData.step < itinerary.length) ? '' : 'none';
+
         };
         preloader.onerror = () => {
             bannerWrapper.classList.remove('banner-loading');
